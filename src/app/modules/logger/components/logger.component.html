@@ -1,0 +1,54 @@
+<div class="logger">
+  <form class="ui-filters" [formGroup]="filterFormGroup">
+    <mat-form-field>
+      <mat-label>Account Id</mat-label>
+      <input matInput formControlName="accountId" type="number" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Повідомлення</mat-label>
+      <input matInput formControlName="title" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Дата</mat-label>
+      <mat-date-range-input [rangePicker]="rangePickerCreated">
+        <input formControlName="createdDateFrom" matStartDate placeholder="З" />
+        <input formControlName="createdDateTo" matEndDate placeholder="По" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="rangePickerCreated"></mat-datepicker-toggle>
+      <mat-date-range-picker #rangePickerCreated>
+        <mat-date-range-picker-actions>
+          <button mat-button matDateRangePickerCancel>Скасувати</button>
+          <button mat-raised-button color="primary" matDateRangePickerApply>Застосувати</button>
+        </mat-date-range-picker-actions>
+      </mat-date-range-picker>
+    </mat-form-field>
+
+    <div
+      [matBadge]="needFixCount()"
+      [matBadgeHidden]="!needFixCount()"
+      [title]="needFixCount()"
+      matBadgeColor="warn"
+      class="logger__need-fix-button"
+    >
+      <mat-button-toggle-group uiSingle formControlName="needToFix">
+        <mat-button-toggle [value]="true">Не оброблено</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <mat-button-toggle-group multiple formControlName="level">
+      @for (level of ['error', 'warning', 'info']; track level) {
+      <mat-button-toggle [value]="level">
+        {{ level }}
+      </mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </form>
+
+  @if (isLoading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  } @else {
+  <p>Тут будуть дані</p>
+  }
+</div>

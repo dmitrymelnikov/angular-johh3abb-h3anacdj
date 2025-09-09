@@ -1,0 +1,55 @@
+<div class="stats">
+  <form class="ui-filters" [formGroup]="filterFormGroup">
+    <mat-form-field>
+      <mat-label>З - ПО</mat-label>
+      <mat-date-range-input
+        [rangePicker]="rangePicker"
+        [comparisonStart]="filterFormGroup.value.compareDateFrom"
+        [comparisonEnd]="filterFormGroup.value.compareDateTo"
+      >
+        <input formControlName="dateFrom" matStartDate required />
+        <input formControlName="dateTo" matEndDate required />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+      <mat-date-range-picker #rangePicker>
+        <mat-date-range-picker-actions>
+          <button mat-button matDateRangePickerCancel>Скасувати</button>
+          <button mat-raised-button color="primary" matDateRangePickerApply>Застосувати</button>
+        </mat-date-range-picker-actions>
+      </mat-date-range-picker>
+    </mat-form-field>
+
+    @if (isCompareMode()) {
+    <mat-form-field>
+      <mat-label>З - ПО</mat-label>
+      <mat-date-range-input
+        [rangePicker]="compareRangePicker"
+        [comparisonStart]="filterFormGroup.value.dateFrom"
+        [comparisonEnd]="filterFormGroup.value.dateTo"
+      >
+        <input formControlName="compareDateFrom" matStartDate required />
+        <input formControlName="compareDateTo" matEndDate required />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="compareRangePicker"></mat-datepicker-toggle>
+      <mat-date-range-picker #compareRangePicker>
+        <mat-date-range-picker-actions>
+          <button mat-button matDateRangePickerCancel>Скасувати</button>
+          <button mat-raised-button color="primary" matDateRangePickerApply>Застосувати</button>
+        </mat-date-range-picker-actions>
+      </mat-date-range-picker>
+    </mat-form-field>
+    }
+
+    <mat-button-toggle-group uiSingle>
+      <mat-button-toggle (click)="toggleCompare()" [value]="false">
+        @if (isCompareMode()) { Не порівнювати } @else { Порівняти }
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </form>
+
+  @if (isLoading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  } @else {
+  <p>Тут будуть дані</p>
+  }
+</div>

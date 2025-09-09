@@ -1,0 +1,38 @@
+<div class="app">
+  <mat-toolbar color="primary" class="toolbar">
+    <div class="toolbar__icon"></div>
+    <span class="toolbar__title">TAXER</span>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="main">
+    <mat-sidenav class="sidenav" mode="side" opened [disableClose]="true">
+      <mat-nav-list>
+        <mat-list-item routerLink="stats" class="sidenav__item" routerLinkActive="sidenav__item--active">
+          <div class="sidenav__item">
+            <a matLine>Статистика</a>
+            <mat-icon>bar_chart</mat-icon>
+          </div>
+        </mat-list-item>
+
+        <mat-list-item routerLink="logger" class="sidenav__item" routerLinkActive="sidenav__item--active">
+          <div class="sidenav__item">
+            <a matLine>Логер</a>
+            <mat-icon>error_outline</mat-icon>
+          </div>
+        </mat-list-item>
+
+        <mat-list-item routerLink="payment" class="sidenav__item" routerLinkActive="sidenav__item--active">
+          <div class="sidenav__item">
+            <a matLine>Податки</a>
+            <mat-icon>attach_money</mat-icon>
+          </div>
+        </mat-list-item>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content class="content">
+      <div class="content__main">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
