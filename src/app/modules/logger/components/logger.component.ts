@@ -24,6 +24,9 @@ import { FilteredAbstractComponent } from '../../../shared/components/filtered-a
 import { UiToggleGroupSingleDirective } from '../../../shared/directives/ui-toggle-group-single.directive';
 
 import { ControlsOf } from '../../../shared/models/controls-of';
+import { FormToUrlBindingService } from '../../../shared/services/form-to-url-binding.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ControlToBind } from '../../../shared/models/control-to-bind.model';
 
 export type LoggerModel = {
   accountId: number;
@@ -73,6 +76,24 @@ export class LoggerComponent extends FilteredAbstractComponent<LoggerModel[], Lo
   protected needFixCount = signal<number>(1);
 
   private readonly fb = inject(FormBuilder);
+
+  private readonly formToUrlBindingService = inject(FormToUrlBindingService);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
+    this.formToUrlBindingService
+      .keepBound(this.filterFormGroup, [
+        { name: 'accountId', paramName: 'account', type: 'number' },
+        { name: 'needToFix', paramName: 'not-fixed', type: 'boolean' },
+        { name: 'level', paramName: 'level', type: 'string-array' },
+        { name: 'title', paramName: 'title', type: 'string' },
+        { name: 'createdDateFrom', paramName: 'from', type: 'date' },
+        { name: 'createdDateTo', paramName: 'to', type: 'date' },
+      ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 
   protected createFilters(): FormGroup<ControlsOf<LoggerFiltersModel>> {
     return this.fb.group<ControlsOf<LoggerFiltersModel>>({
