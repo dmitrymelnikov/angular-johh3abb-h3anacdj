@@ -43,13 +43,20 @@ export class FormToUrlBindingService {
 
   private bind(control: FormControl, metadata: ControlToBind): Observable<void> {
     var paramName: string = metadata.paramName || metadata.name;
+    var first = true;
 
     var queryParam$: Observable<void> = this.queryParamsService.queryParamMap.pipe(
       map((paramMap: ParamMap) => paramMap.get(paramName)),
       distinctUntilChanged(),
       map((value: string) => this.deserializeQueryParam(value, metadata)),
       tap((value: ValueType) => {
+        if (!value && first) {
+          first = false;
+          return;
+        }
+
         control.setValue(value);
+        first = false;
       }),
       map(() => void 0),
     );
