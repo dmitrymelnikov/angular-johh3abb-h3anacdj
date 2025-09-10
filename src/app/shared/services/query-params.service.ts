@@ -9,8 +9,8 @@ import { debounceTime, filter, switchMap } from 'rxjs/operators';
 export class QueryParamsService {
   private readonly mergeSubject: BehaviorSubject<Params> = new BehaviorSubject<Params>(null);
 
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly router: Router = inject(Router);
+  private readonly route: ActivatedRoute = inject(ActivatedRoute);
 
   get queryParamMap(): Observable<ParamMap> {
     return this.route.queryParamMap;

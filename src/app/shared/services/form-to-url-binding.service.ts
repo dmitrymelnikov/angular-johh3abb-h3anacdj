@@ -12,7 +12,7 @@ type ValueType = Primitive | Array<Primitive>;
   providedIn: 'root',
 })
 export class FormToUrlBindingService {
-  private readonly queryParamsService = inject(QueryParamsService);
+  private readonly queryParamsService: QueryParamsService = inject(QueryParamsService);
 
   keepBound(form: FormGroup, controls: ControlToBind[]): Observable<void> {
     var controlsMap: Record<string, FormControl> = this.enumerateControls(form);
