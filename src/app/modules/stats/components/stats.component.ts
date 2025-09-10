@@ -97,9 +97,7 @@ export class StatsComponent extends FilteredAbstractComponent<StatsModel[], Stat
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
 
-    // Довелося сінхронізувати isCompareMode сігнал із формою, бо інакше при завантаженні сторінки з
-    // параметрами compareFrom/compareTo форма ініціалізувалася б, а isCompareMode залишався б false
-    // і відповідні поля були б задизейблені. Краще уникати такого і прив'язувати стан форми лише до FormControl'ів.
+    // Довелося сінхронізувати isCompareMode сігнал із формою, бо інакше при завантаженні сторінки з параметрами compareFrom/compareTo форма ініціалізувалася б, а isCompareMode залишався б false і відповідні поля були б задизейблені. Краще уникати такого і прив'язувати стан форми лише до FormControl'ів.
     this.filterFormGroup
       .get('compareDateFrom')
       .valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
