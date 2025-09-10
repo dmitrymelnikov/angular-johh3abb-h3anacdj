@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { combineLatest, distinctUntilChanged, filter, finalize, map, Observable, of, tap } from 'rxjs';
+import { ParamMap } from '@angular/router';
+import { combineLatest, debounceTime, distinctUntilChanged, map, Observable, tap } from 'rxjs';
 import { ControlToBind } from '../models/control-to-bind.model';
+import { QueryParamsService } from './query-params.service';
 
 type Primitive = string | number | boolean | Date;
 type ValueType = Primitive | Array<Primitive>;
@@ -11,10 +12,7 @@ type ValueType = Primitive | Array<Primitive>;
   providedIn: 'root',
 })
 export class FormToUrlBindingService {
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {}
+  private readonly queryParamsService = inject(QueryParamsService);
 
   keepBound(form: FormGroup, controls: ControlToBind[]): Observable<void> {
     var controlsMap: Record<string, FormControl> = this.enumerateControls(form);
@@ -27,7 +25,7 @@ export class FormToUrlBindingService {
         }
         return this.bind(control, metadata);
       }),
-    ).pipe(map(() => undefined));
+    ).pipe(map(() => void 0));
   }
 
   private enumerateControls(form: FormGroup, parentKey?: string): Record<string, FormControl> {
@@ -44,36 +42,28 @@ export class FormToUrlBindingService {
   }
 
   private bind(control: FormControl, metadata: ControlToBind): Observable<void> {
-    var skipNextEmit: boolean = false;
     var paramName: string = metadata.paramName || metadata.name;
 
-    var queryParam$: Observable<void> = this.route.queryParamMap.pipe(
+    var queryParam$: Observable<void> = this.queryParamsService.queryParamMap.pipe(
       map((paramMap: ParamMap) => paramMap.get(paramName)),
       distinctUntilChanged(),
-      filter(() => (skipNextEmit ? (skipNextEmit = false) : true)),
       map((value: string) => this.deserializeQueryParam(value, metadata)),
       tap((value: ValueType) => {
         control.setValue(value, { emitEvent: false });
       }),
-      map(() => undefined),
+      map(() => void 0),
     );
 
     var controlValue$: Observable<void> = control.valueChanges.pipe(
       distinctUntilChanged(),
+      debounceTime(300),
       tap((value: ValueType) => {
-        skipNextEmit = true;
-        this.router
-          .navigate([], {
-            relativeTo: this.route,
-            queryParams: { [paramName]: this.serializeQueryParam(value, metadata) },
-            queryParamsHandling: 'merge',
-          })
-          .then();
+        this.queryParamsService.merge({ [paramName]: this.serializeQueryParam(value, metadata) });
       }),
-      map(() => undefined),
+      map(() => void 0),
     );
 
-    return combineLatest([queryParam$, controlValue$]).pipe(map(() => undefined));
+    return combineLatest([queryParam$, controlValue$]).pipe(map(() => void 0));
   }
 
   private serializeQueryParam(value: ValueType, metadata: ControlToBind): string {
@@ -87,7 +77,7 @@ export class FormToUrlBindingService {
       case 'number':
         return String(value);
       case 'date':
-        return (value as Date).toISOString();
+        return (value as Date).toISOString().split('T')[0];
       case 'string-array':
         return (value as Array<string>).length ? (value as Array<string>)?.join(',') : null;
       case 'object':

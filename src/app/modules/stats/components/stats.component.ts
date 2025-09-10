@@ -21,6 +21,8 @@ import { FilteredAbstractComponent } from '../../../shared/components/filtered-a
 import { UiToggleGroupSingleDirective } from '../../../shared/directives/ui-toggle-group-single.directive';
 
 import { ControlsOf } from '../../../shared/models/controls-of';
+import { FormToUrlBindingService } from '../../../shared/services/form-to-url-binding.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type StatsModel = {};
 
@@ -62,6 +64,22 @@ export class StatsComponent extends FilteredAbstractComponent<StatsModel[], Stat
   protected isCompareMode = signal<boolean>(false);
 
   private readonly fb = inject(FormBuilder);
+
+  private readonly formToUrlBindingService = inject(FormToUrlBindingService);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
+    this.formToUrlBindingService
+      .keepBound(this.filterFormGroup, [
+        { name: 'dateFrom', paramName: 'from', type: 'date' },
+        { name: 'dateTo', paramName: 'to', type: 'date' },
+        { name: 'compareDateFrom', paramName: 'compareFrom', type: 'date' },
+        { name: 'compareDateTo', paramName: 'compareTo', type: 'date' },
+      ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 
   protected createFilters(): FormGroup<ControlsOf<StatsFiltersModel>> {
     // дефолтні значення для фільтрів

@@ -18,9 +18,10 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-
 import { FilteredAbstractComponent } from '../../../shared/components/filtered-abstract.component';
 import { ControlsOf } from '../../../shared/models/controls-of';
+import { FormToUrlBindingService } from '../../../shared/services/form-to-url-binding.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export enum PaymentType {
   Ep = 'ep',
@@ -72,6 +73,23 @@ export class PaymentsComponent
   protected readonly PaymentType = PaymentType;
 
   private readonly fb = inject(FormBuilder);
+
+  private readonly formToUrlBindingService = inject(FormToUrlBindingService);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
+    this.formToUrlBindingService
+      .keepBound(this.filterFormGroup, [
+        { name: 'type', paramName: 'type', type: 'string' },
+        { name: 'accountId', paramName: 'account', type: 'number' },
+        { name: 'userId', paramName: 'user', type: 'number' },
+        { name: 'startDate', paramName: 'from', type: 'date' },
+        { name: 'endDate', paramName: 'to', type: 'date' },
+      ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 
   protected createFilters(): FormGroup<ControlsOf<PaymentFiltersModel>> {
     return this.fb.group<ControlsOf<PaymentFiltersModel>>({
