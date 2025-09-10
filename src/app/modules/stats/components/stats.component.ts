@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, effect } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -15,7 +15,7 @@ import {
 } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { delay, Observable, of } from 'rxjs';
+import { delay, distinctUntilChanged, Observable, of } from 'rxjs';
 
 import { FilteredAbstractComponent } from '../../../shared/components/filtered-abstract.component';
 import { UiToggleGroupSingleDirective } from '../../../shared/directives/ui-toggle-group-single.directive';
@@ -67,6 +67,23 @@ export class StatsComponent extends FilteredAbstractComponent<StatsModel[], Stat
 
   private readonly formToUrlBindingService = inject(FormToUrlBindingService);
 
+  constructor() {
+    super();
+
+    effect(() => {
+      const isCompare = this.isCompareMode();
+      if (isCompare) {
+        this.filterFormGroup.get('compareDateFrom').enable({ emitEvent: false });
+        this.filterFormGroup.get('compareDateTo').enable({ emitEvent: false });
+      } else {
+        this.filterFormGroup.get('compareDateFrom').disable({ emitEvent: false });
+        this.filterFormGroup.get('compareDateTo').disable({ emitEvent: false });
+        this.filterFormGroup.get('compareDateFrom').reset(null);
+        this.filterFormGroup.get('compareDateTo').reset(null);
+      }
+    });
+  }
+
   override ngOnInit(): void {
     super.ngOnInit();
 
@@ -79,10 +96,20 @@ export class StatsComponent extends FilteredAbstractComponent<StatsModel[], Stat
       ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+
+    // Довелося сінхронізувати isCompareMode сігнал із формою, бо інакше при завантаженні сторінки з
+    // параметрами compareFrom/compareTo форма ініціалізувалася б, а isCompareMode залишався б false
+    // і відповідні поля були б задизейблені. Краще уникати такого і прив'язувати стан форми лише до FormControl'ів.
+    this.filterFormGroup
+      .get('compareDateFrom')
+      .valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((value?: Date) => {
+        this.isCompareMode.set(!!value);
+      });
+    this.isCompareMode.set(!!this.filterFormGroup.get('compareDateFrom').value);
   }
 
   protected createFilters(): FormGroup<ControlsOf<StatsFiltersModel>> {
-    // дефолтні значення для фільтрів
     const today = new Date();
     return this.fb.group<ControlsOf<StatsFiltersModel>>({
       dateFrom: this.fb.control<Date>(
@@ -96,17 +123,7 @@ export class StatsComponent extends FilteredAbstractComponent<StatsModel[], Stat
   }
 
   protected toggleCompare(): void {
-    if (this.filterFormGroup.get('compareDateFrom').enabled) {
-      this.filterFormGroup.get('compareDateFrom').reset(null, { emitEvent: false });
-      this.filterFormGroup.get('compareDateTo').reset(null, { emitEvent: false });
-      this.filterFormGroup.get('compareDateFrom').disable({ emitEvent: false });
-      this.filterFormGroup.get('compareDateTo').disable();
-    } else {
-      this.filterFormGroup.get('compareDateFrom').enable({ emitEvent: false });
-      this.filterFormGroup.get('compareDateTo').enable();
-    }
-
-    this.isCompareMode.set(this.filterFormGroup.get('compareDateFrom').enabled);
+    this.isCompareMode.set(!this.isCompareMode());
   }
 
   protected loadData(): Observable<StatsModel[]> {

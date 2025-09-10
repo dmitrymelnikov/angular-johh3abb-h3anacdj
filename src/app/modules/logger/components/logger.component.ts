@@ -26,7 +26,6 @@ import { UiToggleGroupSingleDirective } from '../../../shared/directives/ui-togg
 import { ControlsOf } from '../../../shared/models/controls-of';
 import { FormToUrlBindingService } from '../../../shared/services/form-to-url-binding.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ControlToBind } from '../../../shared/models/control-to-bind.model';
 
 export type LoggerModel = {
   accountId: number;
