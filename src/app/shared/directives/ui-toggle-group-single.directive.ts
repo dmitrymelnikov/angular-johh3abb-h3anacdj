@@ -2,8 +2,7 @@ import { AfterContentInit, contentChildren, DestroyRef, Directive, inject, OnIni
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 
-// Тут має бути імплементовано ControlValueAccessor для взаімодії з зовнішньою формою. Вся внутрішня/зовнішня
-// взаємодія через FormControl.
+// Тут має бути імплементовано ControlValueAccessor для взаімодії з зовнішньою формою. Вся внутрішня/зовнішня взаємодія через FormControl.
 @Directive({
   selector: '[uiSingle]',
 })
