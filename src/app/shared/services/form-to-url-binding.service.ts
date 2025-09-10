@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
 import { ParamMap } from '@angular/router';
-import { combineLatest, debounceTime, distinctUntilChanged, map, Observable, tap } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, filter, map, Observable, tap } from 'rxjs';
 import { ControlToBind } from '../models/control-to-bind.model';
 import { QueryParamsService } from './query-params.service';
 
@@ -49,7 +49,7 @@ export class FormToUrlBindingService {
       distinctUntilChanged(),
       map((value: string) => this.deserializeQueryParam(value, metadata)),
       tap((value: ValueType) => {
-        control.setValue(value, { emitEvent: false });
+        control.setValue(value);
       }),
       map(() => void 0),
     );
@@ -77,7 +77,7 @@ export class FormToUrlBindingService {
       case 'number':
         return String(value);
       case 'date':
-        return (value as Date).toISOString().split('T')[0];
+        return new Intl.DateTimeFormat('en-CA').format(value as Date);
       case 'string-array':
         return (value as Array<string>).length ? (value as Array<string>)?.join(',') : null;
       case 'object':
